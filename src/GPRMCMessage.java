@@ -9,6 +9,9 @@ class GPRMCMessage extends GpsMessage{
 				TIME_POSITION = 2;
 	
 	public String[] parseMessage(String message_in) {
+		if(message_in == null)
+			return null;
+		
 		String[] Out_LocationAndTime = new String[3];
 		String[] message_array = message_in.split(",");
 		
