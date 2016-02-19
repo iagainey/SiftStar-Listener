@@ -17,13 +17,16 @@ public class SimpleRead implements Runnable, SerialPortEventListener {
 
 	private boolean ready = false,
 					stop = false;
+	private char newLineChar = '$';
 	private int queueSize = 100;
 	private String message = "";
 	private Queue<String> data = new LinkedBlockingQueue<String>(queueSize);
 	
+	private boolean debug_messages = false;
+	
 	public static void main(String[] args) {
 		SimpleRead read = new SimpleRead();
-		read.setCommPortId(7);
+		read.setCommPortId(6);
 		read.read();
 		int x = 0;
 		while(true)
@@ -65,25 +68,25 @@ public class SimpleRead implements Runnable, SerialPortEventListener {
 	public String getMessage(){
 		return data.poll();
 	}
-	public void reset(){
+	public boolean reset(){
 		try {
 			serialPort = (SerialPort) portId.open("SimpleReadApp", 2000);
 		} catch (PortInUseException e) {
-			return;
+			return false;
 			//System.out.println(e);
 		} catch (NullPointerException e){
-			return;
+			return false;
 		}
 		try {
 			inputStream = serialPort.getInputStream();
 		} catch (IOException e) {
-			return;
+			return false;
 			//System.out.println(e);
 		}
 		try {
 			serialPort.addEventListener(this);
 		} catch (TooManyListenersException e) {
-			return;
+			return false;
 			//System.out.println(e);
 		}
 		
@@ -94,39 +97,51 @@ public class SimpleRead implements Runnable, SerialPortEventListener {
 					SerialPort.STOPBITS_1,
 					SerialPort.PARITY_NONE);
 		} catch (UnsupportedCommOperationException e) {
-			return;
+			return false;
 			//System.out.println(e);
 		}
 		ready = true;
 		readThread = new Thread();
 		readThread.start();
+		return true;
 	}
-	public void read(){
-		//System.out.println("1");
+	public boolean read(){
+		if(debug_messages)
+			System.out.println("SimpleRead.read() : opening serial port");
+		if(portId == null)
+			return false;
 		try {
 			if(serialPort == null)
-				serialPort = (SerialPort) portId.open("SimpleReadApp", 2000);
+				serialPort = (SerialPort) portId.open("USB Comm Reader", 2000);
 		} catch (PortInUseException e) {
-			//System.out.println(e);
+			System.out.println(e);
+			System.err.println("Port currently owned and in use");
 		}
-		//System.out.println("2");
+		if(serialPort == null)
+			return false;
+		if(debug_messages)
+			System.out.println("SimpleRead.read() : openings input stream");
 		try {
 			if(inputStream == null)
 					inputStream = serialPort.getInputStream();
 				
 		} catch (IOException e) {
-			//System.out.println(e);
+			System.out.println(e);
 		} catch(NullPointerException e){
 			System.err.println("Please reset the Computer : There is a Thread hogging the usb ports"
 					+ " If you still see this message then cry");
 		}
-		//System.out.println("3");
+		if(debug_messages)
+			System.out.println("SimpleRead.read() : Adding Event Listener");
 		try {
 			serialPort.addEventListener(this);
 		} catch (TooManyListenersException e) {
 			//System.out.println(e);
+		} catch (NullPointerException e){
+			return false;
 		}
-		//System.out.println("4");
+		if(debug_messages)
+			System.out.println("SimpleRead.read() : Uploading comm settings");
 		serialPort.notifyOnDataAvailable(true);
 		try {
 			serialPort.setSerialPortParams(baudRate,
@@ -134,9 +149,9 @@ public class SimpleRead implements Runnable, SerialPortEventListener {
 					SerialPort.STOPBITS_1,
 					SerialPort.PARITY_NONE);
 		} catch (UnsupportedCommOperationException e) {
-			//System.out.println(e);
+			System.out.println(e);
 		}
-		//System.out.println("5");
+		return true;
 	}
 	public void run() {
 		try {
@@ -211,7 +226,7 @@ public class SimpleRead implements Runnable, SerialPortEventListener {
 			return;
 		
 		
-		if(m.contains("$")){
+		if(m.contains(newLineChar+"")){
 			if(data.size() >= queueSize)
 				data.poll();
 			
@@ -228,5 +243,8 @@ public class SimpleRead implements Runnable, SerialPortEventListener {
 	}
 	public void Stop(){
 		stop = true;
+	}
+	public void debugMode(){
+		debug_messages = true;
 	}
 }

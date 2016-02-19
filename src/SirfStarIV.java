@@ -37,14 +37,14 @@ public class SirfStarIV implements Runnable{
 	 * debug_messages : to set to allow debugging message
 	 * 	to print
 	 */
-	private boolean filling 	= true;
+	private boolean filling 		= true;
 	private boolean debug_messages 	= false;
 	/*
 	 * maxMessageAmount : The Size the queue will start deleting messages 
 	 * portNum : the port number the reader will listening to
 	 */
 	private static final int maxMessageAmount = 100;
-	private volatile     int portNum	  = 7;
+	private volatile     int portNum		  = 6;
 	/*
 	 * data : the default queue used to store messages
 	 * GoodMessages : stores acceptable messsages and 
@@ -210,7 +210,8 @@ public class SirfStarIV implements Runnable{
 		while (out == null){
 			do{
 				message = reader.getMessage();
-
+				if(debug_messages && message != null)
+					System.out.println(message);
 				if(message != null && message.length() > 6)
 					type = message.substring(0, 6);
 				else
