@@ -5,8 +5,8 @@
 class GPRMCMessage extends GpsMessage{
 	public static final String TYPE_TEXT = "$GPRMC";
 	public static final int LATITUDE_POSITION = 0,
-							LONGITUDE_POSITION = 1,
-							TIME_POSITION = 2;
+				LONGITUDE_POSITION = 1,
+				TIME_POSITION = 2;
 	
 	public String[] parseMessage(String message_in) {
 		String[] Out_LocationAndTime = new String[3];
@@ -32,6 +32,9 @@ class GPRMCMessage extends GpsMessage{
 				return null;
 		
 		return Out_LocationAndTime;
+	}
+	public String getMessageType(){
+		return TYPE_TEXT;
 	}
 	
 }
