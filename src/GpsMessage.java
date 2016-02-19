@@ -2,6 +2,7 @@
 
 public abstract class GpsMessage{
 	abstract public String[] parseMessage(String message);
+	abstract public String getMessageType();
 	
 	protected static final String minuteToDecibal(String in){
 		int x;
