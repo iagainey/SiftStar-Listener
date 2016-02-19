@@ -52,7 +52,7 @@ public class SirfStarIV implements Runnable{
 	 */
 	private volatile Queue<String[]> 
 			data 		= new LinkedBlockingQueue<String[]>(maxMessageAmount);
-	private volatile final Map<String, GpsMessage> 
+	private volatile Map<String, GpsMessage> 
 			GoodMessages 	= new HashMap<String, GpsMessage>();
 	/*
 	 * RunMessageAmount : the number of messages to 
@@ -204,7 +204,7 @@ public class SirfStarIV implements Runnable{
 		String type;
 		String[] out = null;
 		
-		if(GoodMessages.ketSet().size() == 0)
+		if(GoodMessages.keySet().size() == 0)
 			return null;
 		
 		while (out == null){
@@ -295,9 +295,9 @@ public class SirfStarIV implements Runnable{
 	 * @return boolean, if the type_class is valid
 	 */
 	public boolean addRecievedMessageType(GpsMessage type_class){
-		if(message_tag == null || message_tag.getMessageType().equals(""))
+		if(type_class == null || type_class.getMessageType().equals(""))
 			return false;
-		GoodMessages.put(message_tag, type_class);
+		GoodMessages.put(type_class.getMessageType(), type_class);
 		return true;
 	}
 	/*
@@ -314,7 +314,7 @@ public class SirfStarIV implements Runnable{
 		
 		SirfStarIV device = new SirfStarIV();
 		device.debugMode();
-		device.addRecievedMessageType("$GPRMC", new GPRMCMessage() );
+		device.addRecievedMessageType( new GPRMCMessage() );
 		
 		int x = 0;
 		String[] previous = {""};
