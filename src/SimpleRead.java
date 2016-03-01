@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -15,9 +16,13 @@ public class SimpleRead implements Runnable, SerialPortEventListener {
 	private SerialPort serialPort;
 	private Thread readThread;
 
+<<<<<<< HEAD
 	private boolean ready = false,
 					stop = false;
 	private char newLineChar = '$';
+=======
+	private boolean ready = false;
+>>>>>>> parent of ca7c3ea... Clean Up
 	private int queueSize = 100;
 	private String message = "";
 	private Queue<String> data = new LinkedBlockingQueue<String>(queueSize);
@@ -156,11 +161,7 @@ public class SimpleRead implements Runnable, SerialPortEventListener {
 	public void run() {
 		try {
 			Thread.sleep(20000);
-			if(stop){
-				System.exit(0);
-				this.finalize();
-			}
-		} catch (Throwable e) {
+		} catch (InterruptedException e) {
 			System.out.println(e);
 		}
 	}
@@ -241,10 +242,13 @@ public class SimpleRead implements Runnable, SerialPortEventListener {
 			message += m;
 		}
 	}
+<<<<<<< HEAD
 	public void Stop(){
 		stop = true;
 	}
 	public void debugMode(){
 		debug_messages = true;
 	}
+=======
+>>>>>>> parent of ca7c3ea... Clean Up
 }
