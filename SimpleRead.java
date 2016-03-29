@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -13,17 +14,17 @@ public class SimpleRead implements Runnable, SerialPortEventListener {
 	private int baudRate = 4800;
 	private InputStream inputStream;
 	private SerialPort serialPort;
+	private Thread readThread;
 
-	private boolean ready = false,
-					stop = false;
+	private boolean ready = false;
 	private int queueSize = 100;
 	private String message = "";
 	private Queue<String> data = new LinkedBlockingQueue<String>(queueSize);
 	
 	public static void main(String[] args) {
 		SimpleRead read = new SimpleRead();
-		read.setCommPortId(5);
-		read.Connect();
+		read.setCommPortId(7);
+		read.read();
 		int x = 0;
 		while(true)
 			if(read.data.size() > 0){
@@ -64,13 +65,9 @@ public class SimpleRead implements Runnable, SerialPortEventListener {
 	public String getMessage(){
 		return data.poll();
 	}
-	public void StopThread(){
-		stop = true;
-	}
 	public void reset(){
-		ready = false;
 		try {
-			serialPort = (SerialPort) portId.open("SimpleReader", 2000);
+			serialPort = (SerialPort) portId.open("SimpleReadApp", 2000);
 		} catch (PortInUseException e) {
 			return;
 			//System.out.println(e);
@@ -101,18 +98,16 @@ public class SimpleRead implements Runnable, SerialPortEventListener {
 			//System.out.println(e);
 		}
 		ready = true;
+		readThread = new Thread();
+		readThread.start();
 	}
-	public void Connect(){
-		ready = false;
+	public void read(){
 		//System.out.println("1");
 		try {
-			while(serialPort == null)
-				serialPort = (SerialPort) portId.open("SimpleReader", 2000);
+			if(serialPort == null)
+				serialPort = (SerialPort) portId.open("SimpleReadApp", 2000);
 		} catch (PortInUseException e) {
-			System.err.println("Please reset the Computer : There is a Thread attached "
-					+ "the usb ports. If you still see this message then cry");
-			System.err.println(e);
-			return;
+			//System.out.println(e);
 		}
 		//System.out.println("2");
 		try {
@@ -122,9 +117,8 @@ public class SimpleRead implements Runnable, SerialPortEventListener {
 		} catch (IOException e) {
 			//System.out.println(e);
 		} catch(NullPointerException e){
-			System.err.println("Please reset the Computer : There is a Thread attached "
-					+ "the usb ports. If you still see this message then cry");
-			return;
+			System.err.println("Please reset the Computer : There is a Thread hogging the usb ports"
+					+ " If you still see this message then cry");
 		}
 		//System.out.println("3");
 		try {
@@ -145,14 +139,10 @@ public class SimpleRead implements Runnable, SerialPortEventListener {
 		//System.out.println("5");
 	}
 	public void run() {
-		while(true){
-			while(!ready)
-				reset();
-			while(ready){
-					
-			}
-			if(stop)
-				return;
+		try {
+			Thread.sleep(20000);
+		} catch (InterruptedException e) {
+			System.out.println(e);
 		}
 	}
 
@@ -201,6 +191,7 @@ public class SimpleRead implements Runnable, SerialPortEventListener {
 	}
 	public final void waitAll(){
 		try {
+			readThread.wait();
 			super.wait();
 		} catch (InterruptedException e) {
 			//e.printStackTrace();

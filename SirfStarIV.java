@@ -71,7 +71,7 @@ public class SirfStarIV implements Runnable{
 			reader = new SimpleRead();
 			reader_thread = new Thread(reader);
 			reader.setCommPortId(portNum);
-			reader.Connect();
+			reader.read();
 			reader_thread.run();
 			return true;
 		}
